@@ -26,7 +26,7 @@ def can_png(file: typing.TextIO) -> CanResult:
 def can_text(file: typing.TextIO) -> CanResult:
     text = file.read()
     text_bytes = text
-    return text_bytes
+    return text_bytes + b'\0'
 
 CANNERS: dict[str, typing.Callable[[typing.TextIO], CanResult]] = {
     ".png": can_png,
@@ -55,7 +55,7 @@ def can(dir, file: typing.BinaryIO):
                 index[src_file_name] = (bytes_, bytes_count, length)
                 bytes_count += length
 
-    written_count = 0
+    written_count = len(b'CAN!')
 
     # write index
     file.write(len(index).to_bytes(4, "little"))
@@ -67,17 +67,21 @@ def can(dir, file: typing.BinaryIO):
         file.write(bytes_start.to_bytes(4, "little"))
         file.write(bytes_length.to_bytes(4, "little"))
 
-        written_count += 12 + 2 + len(entry_name)
+        written_count += 8 + len(b'\0') + len(entry_name.encode("utf-8"))
 
     # write data
+    data_length = 0
+    print("Data begins in CAN file @ {} bytes".format(written_count))
     for entry_name in index.keys():
         bytes_, bytes_start, byte_length = index[entry_name]
 
         print("{} (@{}): {}, {}".format(entry_name, written_count, bytes_start, byte_length))
         file.write(bytes_)
 
+        data_length += byte_length
         written_count += len(bytes_)
-            
+    
+    print("Wrote {} bytes total, data section {} bytes".format(written_count, data_length))
 
 
 class canner_colors:

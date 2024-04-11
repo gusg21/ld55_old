@@ -6,8 +6,8 @@
 
 using namespace ld55;
 
-SDLWindow::SDLWindow() {
-  window_ = SDL_CreateWindow("LD55 Engine", 1600, 900, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+SDLWindow::SDLWindow(uint32_t width, uint32_t height) {
+  window_ = SDL_CreateWindow("LD55 Engine", width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   if (window_ == nullptr) {
     printf("Failed to create SDL Window!");
   }
@@ -32,4 +32,6 @@ bool SDLWindow::HandleEvents() {
 
 void* SDLWindow::GetWindowHandle() { return window_; }
 
-
+void SDLWindow::Present() {
+  SDL_GL_SwapWindow(window_);
+}

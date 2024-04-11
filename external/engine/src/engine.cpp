@@ -28,8 +28,8 @@ void Engine::Init(const std::string& can_file) {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-  ServiceLocator::Provide(new SDLWindow());
+  ServiceLocator::Provide(new SDLWindow(1600, 900));
   ServiceLocator::Provide(new Assets(can_file));
   ServiceLocator::Provide(
-      new Renderer(ServiceLocator::GetWindow()->GetWindowHandle()));
+      new Renderer(ServiceLocator::GetWindow()->GetWindowHandle(), 1600, 900));
 }

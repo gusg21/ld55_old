@@ -33,28 +33,30 @@ static uint32_t GetIntFromBytes(const unsigned char *bytes) {
 }
 
 namespace ld55 {
-Texture::Texture(const unsigned char *data, int32_t wrapMode, int32_t magFilter,
+Texture::Texture(const void *data, int32_t wrapMode, int32_t magFilter,
                  int32_t minFilter, bool mipmap) {
   id = loadTexture(data, wrapMode, magFilter, minFilter, mipmap);
 }
 
-Texture::Texture(const unsigned char *data) {
+Texture::Texture(const void *data) {
   id = loadTexture(data, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, true);
 }
 
-uint32_t Texture::loadTexture(const unsigned char *data, int32_t wrapMode,
+uint32_t Texture::loadTexture(const void *data, int32_t wrapMode,
                               int32_t magFilter, int32_t minFilter,
                               bool mipmap) {
+  const unsigned char* dataBytes = (const unsigned char*)data;
+
   uint32_t width, height;
-  width = GetIntFromBytes(&data[0]);
-  height = GetIntFromBytes(&data[4]);
+  width = GetIntFromBytes(&dataBytes[0]);
+  height = GetIntFromBytes(&dataBytes[4]);
 
   uint32_t texture;
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
   int format = GL_RGBA;
   glTexImage2D(GL_TEXTURE_2D, 0, format, (GLsizei)width, (GLsizei)height, 0,
-               format, GL_UNSIGNED_BYTE, &data[8]);
+               format, GL_UNSIGNED_BYTE, &dataBytes[8]);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
@@ -72,10 +74,8 @@ uint32_t Texture::loadTexture(const unsigned char *data, int32_t wrapMode,
   return texture;
 }
 
-void Texture::bindToTextureUnit(uint32_t unit) {
-  glActiveTexture(GL_TEXTURE0 + unit);
+void Texture::bind() {
   glBindTexture(GL_TEXTURE_2D, getId());
-  glBindTextureUnit(unit, getId());
 }
 
 }  // namespace ld55

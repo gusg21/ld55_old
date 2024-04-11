@@ -8,14 +8,13 @@
 using namespace ld55;
 
 int main() {
-  printf("Hello, world!\n");
   Engine::Init("ld55.can");
   ServiceLocator::GetWindow()->Open();
 
-//  const AssetHandle* barnHandle =
-//      ServiceLocator::GetAssets()->FindAssetHandle("barn.png");
-//  Texture tex(
-//      ServiceLocator::GetAssets()->GetAssetData(barnHandle));
+  const AssetHandle* barnHandle =
+      ServiceLocator::GetAssets()->FindAssetHandle("barn.png");
+  Texture tex(
+      ServiceLocator::GetAssets()->GetAssetData(barnHandle));
 
   const AssetHandle* fragHandle =
       ServiceLocator::GetAssets()->FindAssetHandle("sprite.frag");
@@ -26,11 +25,15 @@ int main() {
           ServiceLocator::GetAssets()->GetAssetData(vertHandle)),
       reinterpret_cast<const char*>(
           ServiceLocator::GetAssets()->GetAssetData(fragHandle)));
-  shader.use();
-  //tex.bindToTextureUnit(0);
+  ServiceLocator::GetRenderer()->SetSpriteShader(&shader);
 
   bool should_close = false;
   while (!should_close) {
     should_close = ServiceLocator::GetWindow()->HandleEvents();
+    ServiceLocator::GetRenderer()->Clear();
+
+    ServiceLocator::GetRenderer()->DrawSprite(tex, {0, 0}, {10, 10}, 0.f, {1.f, 1.f, 1.f});
+
+    ServiceLocator::GetWindow()->Present();
   }
 }

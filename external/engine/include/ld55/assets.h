@@ -16,11 +16,11 @@ class Assets {
   explicit Assets(const std::string& can_file);
 
   const AssetHandle* FindAssetHandle(const std::string& name);
-  const unsigned char* GetAssetData(const AssetHandle* handle);
+  const char* GetAssetData(const AssetHandle* handle);
 
  private:
   uint32_t data_size_ = 0;
-  unsigned char* data_ = nullptr;
+  char* data_ = nullptr;
   std::map<std::string, AssetHandle> assets_;
 };
 }  // namespace ld55
