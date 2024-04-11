@@ -54,20 +54,20 @@ Assets::Assets(const std::string &can_file) {
   }
 
   // Allocate the data block
-  data_ = new char[block_count_ * BLOCK_SIZE];
+  data_ = new unsigned char[block_count_ * BLOCK_SIZE];
 
   // Read the blocks
   for (size_t i = 0; i < block_count_; i++) {
-    can_stream.read(&data_[i * BLOCK_SIZE],  // I love pointer arithmetic!
+    can_stream.read((char*) &data_[i * BLOCK_SIZE],  // I love pointer arithmetic!
                     BLOCK_SIZE);
   }
 }
 
-const char *Assets::getAssetData(const AssetHandle &handle) {
-  return &data_[handle.start_block * BLOCK_SIZE];
+const unsigned char *Assets::GetAssetData(const AssetHandle *handle) {
+  return &(data_[handle->start_block * BLOCK_SIZE]);
 }
 
-const AssetHandle *Assets::findAssetHandle(const std::string &name) {
+const AssetHandle *Assets::FindAssetHandle(const std::string &name) {
   auto entry = assets_.find(name);
   if (entry == assets_.end()) return nullptr;
   return &entry->second;

@@ -1,8 +1,8 @@
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 namespace ld55 {
 struct AssetHandle {
@@ -16,12 +16,12 @@ class Assets {
   Assets() = default;
   explicit Assets(const std::string& can_file);
 
-  const AssetHandle* findAssetHandle(const std::string& name);
-  const char* getAssetData(const AssetHandle& handle);
+  const AssetHandle* FindAssetHandle(const std::string& name);
+  const unsigned char* GetAssetData(const AssetHandle* handle);
 
  private:
   uint32_t block_count_ = 0;
-  char* data_ = nullptr;
+  unsigned char* data_ = nullptr;
   std::map<std::string, AssetHandle> assets_;
 };
 }  // namespace ld55

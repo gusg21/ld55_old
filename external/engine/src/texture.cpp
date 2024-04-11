@@ -8,7 +8,7 @@
 
 #include "glad/glad.h"
 
-static int getTextureFormat(int32_t numComponents) {
+static int GetTextureFormat(int32_t numComponents) {
   switch (numComponents) {
     default:
       return GL_RGBA;
@@ -21,16 +21,40 @@ static int getTextureFormat(int32_t numComponents) {
   }
 }
 
+static uint32_t GetIntFromBytes(const unsigned char *bytes) {
+  uint32_t x = 0;
+
+  x = (x << 8) + bytes[3];
+  x = (x << 8) + bytes[2];
+  x = (x << 8) + bytes[1];
+  x = (x << 8) + bytes[0];
+
+  return x;
+}
+
 namespace ld55 {
-uint32_t Texture::loadTexture(const void *data, uint32_t width, uint32_t height,
-                              int32_t wrapMode, int32_t magFilter,
-                              int32_t minFilter, bool mipmap) {
+Texture::Texture(const unsigned char *data, int32_t wrapMode, int32_t magFilter,
+                 int32_t minFilter, bool mipmap) {
+  id = loadTexture(data, wrapMode, magFilter, minFilter, mipmap);
+}
+
+Texture::Texture(const unsigned char *data) {
+  id = loadTexture(data, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, true);
+}
+
+uint32_t Texture::loadTexture(const unsigned char *data, int32_t wrapMode,
+                              int32_t magFilter, int32_t minFilter,
+                              bool mipmap) {
+  uint32_t width, height;
+  width = GetIntFromBytes(&data[0]);
+  height = GetIntFromBytes(&data[4]);
+
   uint32_t texture;
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
   int format = GL_RGBA;
-  glTexImage2D(GL_TEXTURE_2D, 0, format, (GLsizei)width, (GLsizei)height, 0, format,
-               GL_UNSIGNED_BYTE, data);
+  glTexImage2D(GL_TEXTURE_2D, 0, format, (GLsizei)width, (GLsizei)height, 0,
+               format, GL_UNSIGNED_BYTE, &data[8]);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
@@ -48,18 +72,10 @@ uint32_t Texture::loadTexture(const void *data, uint32_t width, uint32_t height,
   return texture;
 }
 
-Texture::Texture(const void *data, uint32_t width, uint32_t height, int32_t wrapMode, int32_t magFilter,
-                 int32_t minFilter, bool mipmap) {
-  id = loadTexture(data, width, height, wrapMode, magFilter, minFilter, mipmap);
-}
-
 void Texture::bindToTextureUnit(uint32_t unit) {
   glActiveTexture(GL_TEXTURE0 + unit);
   glBindTexture(GL_TEXTURE_2D, getId());
   glBindTextureUnit(unit, getId());
 }
 
-Texture::Texture(const void *data, uint32_t width, uint32_t height) {
-  id = loadTexture(data, width, height, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR, true);
-}
 }  // namespace ld55

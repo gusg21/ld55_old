@@ -7,9 +7,10 @@
 namespace ld55 {
 class SDLWindow : public Window {
 public:
-  SDLWindow() = default;
+  SDLWindow();
   virtual void Open() override;
   virtual bool HandleEvents() override;
+  virtual void* GetWindowHandle() override;
 
 private:
   SDL_Window *window_ = nullptr;
