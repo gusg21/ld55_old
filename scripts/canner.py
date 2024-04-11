@@ -8,7 +8,7 @@ CanResult = tuple[bytes, int] # bytes to add, block count
 
 def can_png(file: typing.TextIO) -> CanResult:
     bytes_ = bytes()
-    image_file = Image.open(file);
+    image_file = Image.open(file)
     width, height = image_file.size
     bytes_ += width.to_bytes(4, "little")
     bytes_ += height.to_bytes(4, "little")
@@ -39,7 +39,7 @@ def can(dir, file: typing.BinaryIO):
     file.write(b'CAN!')
 
     index: dict[str, tuple[int, int, bytes, int]] = {}
-    block_count_sum = 0
+    bytes_count = 0
     for (dirpath, _, filenames) in os.walk(dir):
         for src_file_name in filenames:
             src_file = open(os.path.join(dirpath, src_file_name), "rb")
@@ -47,35 +47,36 @@ def can(dir, file: typing.BinaryIO):
             if ext in CANNERS.keys():
                 print("Canning {}...".format(src_file_name))
                 bytes_ = CANNERS[ext](src_file)
-                block_count = math.ceil(len(bytes_) / BLOCK_SIZE)
+                length = len(bytes_)
 
-                print("{} => {} blocks".format(src_file_name, block_count))
-                padded_bytes = bytes_
-                padded_bytes += (block_count * BLOCK_SIZE - len(bytes_)) * b'\0'
-                print("\t{} bytes padded".format(len(padded_bytes)))
-
-                if block_count == 0:
+                if length == 0:
                     print("\tWARNING: No bytes generated for this asset!")
 
-                index[src_file_name] = (block_count_sum, block_count, padded_bytes, len(bytes_))
-                block_count_sum += block_count
+                index[src_file_name] = (bytes_, bytes_count, length)
+                bytes_count += length
+
+    written_count = 0
 
     # write index
     file.write(len(index).to_bytes(4, "little"))
+    written_count += 4
     for entry_name in index.keys():
-        begin, length, _, byte_length = index[entry_name]
+        _, bytes_start, bytes_length = index[entry_name]
         file.write(entry_name.encode("utf-8"))
         file.write(b'\0')
-        file.write(begin.to_bytes(4, "little"))
-        file.write(length.to_bytes(4, "little"))
-        file.write(byte_length.to_bytes(4, "little"))
+        file.write(bytes_start.to_bytes(4, "little"))
+        file.write(bytes_length.to_bytes(4, "little"))
+
+        written_count += 12 + 2 + len(entry_name)
 
     # write data
     for entry_name in index.keys():
-        begin, length, bytes, byte_length = index[entry_name]
+        bytes_, bytes_start, byte_length = index[entry_name]
 
-        print("{} ({} bytes): {}, {}".format(entry_name, byte_length, begin, length))
-        file.write(bytes)
+        print("{} (@{}): {}, {}".format(entry_name, written_count, bytes_start, byte_length))
+        file.write(bytes_)
+
+        written_count += len(bytes_)
             
 
 

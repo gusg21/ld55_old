@@ -6,8 +6,7 @@
 
 namespace ld55 {
 struct AssetHandle {
-  uint32_t start_block;
-  uint32_t block_count;
+  uint32_t start_byte;
   uint32_t byte_count;
 };
 
@@ -20,7 +19,7 @@ class Assets {
   const unsigned char* GetAssetData(const AssetHandle* handle);
 
  private:
-  uint32_t block_count_ = 0;
+  uint32_t data_size_ = 0;
   unsigned char* data_ = nullptr;
   std::map<std::string, AssetHandle> assets_;
 };

@@ -12,10 +12,10 @@ int main() {
   Engine::Init("ld55.can");
   ServiceLocator::GetWindow()->Open();
 
-  const AssetHandle* barnHandle =
-      ServiceLocator::GetAssets()->FindAssetHandle("barn.png");
-  Texture tex(
-      ServiceLocator::GetAssets()->GetAssetData(barnHandle));
+//  const AssetHandle* barnHandle =
+//      ServiceLocator::GetAssets()->FindAssetHandle("barn.png");
+//  Texture tex(
+//      ServiceLocator::GetAssets()->GetAssetData(barnHandle));
 
   const AssetHandle* fragHandle =
       ServiceLocator::GetAssets()->FindAssetHandle("sprite.frag");
@@ -27,7 +27,7 @@ int main() {
       reinterpret_cast<const char*>(
           ServiceLocator::GetAssets()->GetAssetData(fragHandle)));
   shader.use();
-  tex.bindToTextureUnit(0);
+  //tex.bindToTextureUnit(0);
 
   bool should_close = false;
   while (!should_close) {

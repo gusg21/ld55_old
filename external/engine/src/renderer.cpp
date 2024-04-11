@@ -29,5 +29,6 @@ ld55::Renderer::Renderer(const void* window_handle) {
 
 ld55::Shader ld55::Renderer::CreateShader(const char *vertexSource,
                                           const char *fragmentSource) {
+  printf("VERT:\n%s\n\nFRAG:\n%s\n", vertexSource, fragmentSource);
   return { std::string(vertexSource), std::string(fragmentSource) };
 }

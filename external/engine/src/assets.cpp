@@ -1,6 +1,7 @@
 #include "ld55/assets.h"
 
 #include <fstream>
+#include <memory>
 #include <iostream>
 
 #define BLOCK_SIZE 512
@@ -34,37 +35,35 @@ Assets::Assets(const std::string &can_file) {
                   4);  // pretend the int is a char array
 
   // Load the index
-  block_count_ = 0;
+  data_size_ = 0;
   for (int32_t i = 0; i < can_index_size; i++) {
     char name[512] = {0};
     ReadNullTerminated(can_stream, name);
 
-    uint32_t start_block, block_count, byte_count;
-    can_stream.read((char *)&start_block, 4);
-    can_stream.read((char *)&block_count, 4);
+    uint32_t start_byte, byte_count;
+    can_stream.read((char *)&start_byte, 4);
     can_stream.read((char *)&byte_count, 4);
-    printf("%s starts at block %d, %d blocks, %d bytes\n", name, start_block,
-           block_count, byte_count);
+    printf("%s starts at byte %d, %d bytes\n", name, start_byte, byte_count);
 
-    assets_[name] = {.start_block = start_block,
-                     .block_count = block_count,
+    assets_[name] = {.start_byte = start_byte,
                      .byte_count = byte_count};
 
-    block_count_ += block_count;
+    data_size_ += byte_count;
   }
 
   // Allocate the data block
-  data_ = new unsigned char[block_count_ * BLOCK_SIZE];
+  data_ = new unsigned char[data_size_];
 
-  // Read the blocks
-  for (size_t i = 0; i < block_count_; i++) {
-    can_stream.read((char*) &data_[i * BLOCK_SIZE],  // I love pointer arithmetic!
-                    BLOCK_SIZE);
-  }
+  // Read the data
+  can_stream.read(
+        (char *)&data_,  // I love pointer arithmetic!
+        data_size_);
 }
 
 const unsigned char *Assets::GetAssetData(const AssetHandle *handle) {
-  return &(data_[handle->start_block * BLOCK_SIZE]);
+  printf("Getting asset @ offset %d\n", handle->start_byte);
+  const unsigned char *data_ptr = &(data_[handle->start_byte]);
+  return data_ptr;
 }
 
 const AssetHandle *Assets::FindAssetHandle(const std::string &name) {
